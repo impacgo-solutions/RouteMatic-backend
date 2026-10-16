@@ -6,4 +6,3 @@ backups/
 .env.demo
 DEMO_ACCOUNTS.local.md
 .venv
-.env.example
