@@ -1,0 +1,25 @@
+%%{init: {'flowchart': {'htmlLabels': true, 'nodeSpacing': 25, 'rankSpacing': 70, 'curve': 'basis'}}}%%
+flowchart LR
+  subgraph G0["Platform (per schema)"]
+    direction TB
+    schema_migrations["<b>schema_migrations</b><br/>🔑 scope<br/>🔑 version<br/>name<br/>checksum<br/>applied_at<br/>duration_ms"]
+  end
+  subgraph G1["Identity & registry (public)"]
+    direction TB
+    platform_users["<b>platform_users</b><br/>🔑 id<br/>email<br/>password_hash<br/>display_name<br/>is_platform_admin<br/>active<br/>created_at"]
+    tenant_memberships["<b>tenant_memberships</b><br/>🔑 user_id<br/>🔑 tenant_id<br/>🔗 role<br/>scope_id<br/>created_at<br/>active"]
+    tenants["<b>tenants</b><br/>🔑 id<br/>slug<br/>name<br/>schema_name<br/>status<br/>schema_version<br/>settings<br/>created_at<br/>updated_at<br/>ready_at<br/>kind"]
+    global_roles["<b>global_roles</b><br/>🔑 code<br/>name<br/>description<br/>tenant_scoped"]
+    tenant_provision_log["<b>tenant_provision_log</b><br/>🔑 id<br/>slug<br/>outcome<br/>detail<br/>logged_at"]
+  end
+  style schema_migrations fill:#EEEEEE,stroke:#667085,text-align:left
+  style G0 fill:#EEEEEE33,stroke:#EEEEEE,stroke-width:2px
+  style platform_users fill:#E3E0FF,stroke:#667085,text-align:left
+  style tenant_memberships fill:#E3E0FF,stroke:#667085,text-align:left
+  style tenants fill:#E3E0FF,stroke:#667085,text-align:left
+  style global_roles fill:#E3E0FF,stroke:#667085,text-align:left
+  style tenant_provision_log fill:#E3E0FF,stroke:#667085,text-align:left
+  style G1 fill:#E3E0FF33,stroke:#E3E0FF,stroke-width:2px
+  global_roles --> tenant_memberships
+  platform_users --> tenant_memberships
+  tenants --> tenant_memberships

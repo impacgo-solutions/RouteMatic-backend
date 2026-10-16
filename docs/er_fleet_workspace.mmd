@@ -1,0 +1,124 @@
+%%{init: {'flowchart': {'htmlLabels': true, 'nodeSpacing': 25, 'rankSpacing': 70, 'curve': 'basis'}}}%%
+flowchart LR
+  subgraph G0["Fleet registry & users"]
+    direction TB
+    companies["<b>companies</b><br/>🔑 id<br/>code<br/>name<br/>🔗 tenant_id<br/>status<br/>🔗 created_by<br/>created_at<br/>updated_at"]
+    fleet_users["<b>fleet_users</b><br/>🔑 user_id<br/>role<br/>active<br/>created_at"]
+    admins["<b>admins</b><br/>🔑 id<br/>🔗 user_id<br/>name<br/>email<br/>password_hash<br/>🔗 role<br/>status<br/>last_login_at<br/>created_at<br/>updated_at"]
+    managers["<b>managers</b><br/>🔑 id<br/>🔗 user_id<br/>phone<br/>status<br/>created_at<br/>updated_at"]
+  end
+  subgraph G1["Fleet assets"]
+    direction TB
+    vehicles["<b>vehicles</b><br/>🔑 id<br/>vehicle_code<br/>fictional_registration<br/>type<br/>propulsion<br/>total_seats<br/>luxury_class<br/>status<br/>odometer_km<br/>battery_or_fuel_percent<br/>🔗 assigned_driver_id<br/>assigned_employer_id<br/>requires_security_guard<br/>security_guard_assigned<br/>notes<br/>last_inspection_at<br/>🔗 home_parking_id<br/>model<br/>rc_number<br/>engine_number<br/>color<br/>fuel_type<br/>active"]
+    vehicle_diagnostic_codes["<b>vehicle_diagnostic_codes</b><br/>🔑 vehicle_id<br/>🔑 code<br/>position"]
+    drivers["<b>drivers</b><br/>🔑 id<br/>driver_code<br/>name<br/>fictional_contact<br/>status<br/>🔗 assigned_vehicle_id<br/>shift_start_minutes<br/>shift_end_minutes<br/>attendance_status<br/>completed_trip_count<br/>safety_checklist_status<br/>licence_class<br/>notes<br/>licence_number<br/>licence_expiry<br/>email<br/>address<br/>gender<br/>active"]
+    locations["<b>locations</b><br/>🔑 id<br/>code<br/>name<br/>type<br/>address<br/>demo_x<br/>demo_y<br/>geofence_radius_m<br/>employer_id<br/>active<br/>notes<br/>capacity<br/>latitude<br/>longitude<br/>fleet_owned"]
+    shifts["<b>shifts</b><br/>🔑 id<br/>🔗 driver_id<br/>shift_date<br/>scheduled_start<br/>scheduled_end<br/>actual_check_in<br/>actual_check_out<br/>status<br/>regularization_status<br/>regularization_reason<br/>notes<br/>handover_notes<br/>🔗 handover_parking_id<br/>end_exception<br/>end_odometer_km"]
+    inspections["<b>inspections</b><br/>🔑 id<br/>🔗 vehicle_id<br/>🔗 driver_id<br/>trip_id<br/>date<br/>notes<br/>photo_path<br/>overall_status<br/>submitted_at<br/>🔗 defect_incident_id"]
+    inspection_items["<b>inspection_items</b><br/>🔑 inspection_id<br/>🔑 position<br/>item_key<br/>label<br/>critical<br/>result<br/>note"]
+    geofences["<b>geofences</b><br/>🔑 id<br/>name<br/>kind<br/>center_x<br/>center_y<br/>radius_km<br/>active<br/>notes<br/>created_at"]
+    geofence_vehicles["<b>geofence_vehicles</b><br/>🔑 geofence_id<br/>🔑 vehicle_id<br/>position"]
+  end
+  subgraph G2["Fleet configuration & contracts"]
+    direction TB
+    fleet_policy["<b>fleet_policy</b><br/>🔑 id<br/>alcohol_monitoring_enabled<br/>alcohol_threshold_mg<br/>alcohol_check_point<br/>speed_limit_kmh<br/>speed_alerts_enabled<br/>geofence_alerts_enabled<br/>route_corridor_km<br/>auto_match_adhoc<br/>max_added_detour_minutes<br/>carbon_credit_price_per_tonne<br/>baseline_co2_grams_per_km<br/>baseline_speed_kmh<br/>baseline_cost_per_km<br/>updated_at"]
+    fleet_policy_sos_recipients["<b>fleet_policy_sos_recipients</b><br/>🔑 policy_id<br/>🔑 recipient<br/>position"]
+    traffic_state["<b>traffic_state</b><br/>🔑 id<br/>internal_roads<br/>ring_road<br/>source<br/>updated_at<br/>note"]
+    optimization_configs["<b>optimization_configs</b><br/>🔑 id<br/>employer_id<br/>name<br/>enabled<br/>cost_weight<br/>punctuality_weight<br/>distance_weight<br/>travel_time_weight<br/>utilization_weight<br/>ev_preference_weight<br/>customer_preference_weight<br/>safety_weight<br/>guard_requirement_weight<br/>detour_weight<br/>pickup_proximity_weight<br/>employee_preference_weight<br/>maximum_arrival_minutes<br/>minimum_buffer_minutes<br/>minimum_ev_percentage<br/>active_parameters<br/>created_at<br/>updated_at"]
+    optimization_config_vehicle_types["<b>optimization_config_vehicle_types</b><br/>🔑 config_id<br/>🔑 vehicle_type<br/>position"]
+    optimization_config_parameters["<b>optimization_config_parameters</b><br/>🔑 config_id<br/>🔑 param_key<br/>param_value"]
+    contracts["<b>contracts</b><br/>🔑 id<br/>contract_code<br/>employer_id<br/>document_ref<br/>valid_from<br/>valid_until<br/>status<br/>agreed_vehicle_count<br/>cost_per_vehicle<br/>currency<br/>cost_period<br/>hard_vehicle_limit<br/>contact_id<br/>contact_name<br/>notes<br/>created_at<br/>updated_at"]
+    fleet_allocations["<b>fleet_allocations</b><br/>🔑 id<br/>employer_id<br/>resource_type<br/>resource_id<br/>window_start_minutes<br/>window_end_minutes<br/>label<br/>active<br/>created_at"]
+  end
+  subgraph G3["Safety & telematics"]
+    direction TB
+    vehicle_events["<b>vehicle_events</b><br/>🔑 id<br/>🔗 vehicle_id<br/>trip_id<br/>🔗 driver_id<br/>🔗 geofence_id<br/>type<br/>occurred_at<br/>description<br/>value<br/>limit<br/>x<br/>y<br/>acknowledged_at<br/>🔗 incident_id<br/>simulated"]
+    alcohol_tests["<b>alcohol_tests</b><br/>🔑 id<br/>🔗 driver_id<br/>trip_id<br/>🔗 vehicle_id<br/>tested_at<br/>reading_mg<br/>threshold_mg<br/>result<br/>method<br/>note<br/>cleared_by<br/>cleared_at<br/>🔗 incident_id"]
+    incidents["<b>incidents</b><br/>🔑 id<br/>reference<br/>type<br/>trip_id<br/>🔗 driver_id<br/>🔗 vehicle_id<br/>location_id<br/>description<br/>severity<br/>status<br/>reported_by_role<br/>reported_by_id<br/>resolution_notes<br/>demo_location_label<br/>replacement_requested<br/>is_sos<br/>created_at<br/>updated_at"]
+    sos_dispatches["<b>sos_dispatches</b><br/>🔑 id<br/>🔗 incident_id<br/>recipient<br/>status<br/>channel<br/>created_at<br/>acknowledged_at<br/>acknowledged_by<br/>note"]
+  end
+  subgraph G4["Platform (per schema)"]
+    direction TB
+    notifications["<b>notifications</b><br/>🔑 id<br/>recipient_role<br/>recipient_id<br/>title<br/>body<br/>category<br/>created_at<br/>read_at<br/>related_entity_type<br/>related_entity_id<br/>demo_only"]
+    support_tickets["<b>support_tickets</b><br/>🔑 id<br/>reference<br/>created_by_role<br/>created_by_id<br/>category<br/>subject<br/>description<br/>related_trip_id<br/>status<br/>response<br/>created_at<br/>updated_at"]
+    audit_events["<b>audit_events</b><br/>🔑 id<br/>actor_role<br/>actor_id<br/>action<br/>entity_type<br/>entity_id<br/>timestamp<br/>summary<br/>outcome<br/>changes<br/>reason<br/>related<br/>simulated"]
+    user_settings["<b>user_settings</b><br/>🔑 id<br/>share_simulated_location<br/>pickup_reminders<br/>delay_alerts<br/>service_notices<br/>show_phone_to_driver<br/>large_text"]
+    id_counters["<b>id_counters</b><br/>🔑 prefix<br/>last_value"]
+    schema_migrations["<b>schema_migrations</b><br/>🔑 version<br/>name<br/>checksum<br/>applied_at<br/>duration_ms"]
+  end
+  subgraph GX["Other schemas (referenced, not copied)"]
+    x_public_platform_users["public.platform_users"]
+    x_public_global_roles["public.global_roles"]
+    x_public_tenants["public.tenants"]
+  end
+  style companies fill:#E3E0FF,stroke:#667085,text-align:left
+  style fleet_users fill:#E3E0FF,stroke:#667085,text-align:left
+  style admins fill:#E3E0FF,stroke:#667085,text-align:left
+  style managers fill:#E3E0FF,stroke:#667085,text-align:left
+  style G0 fill:#E3E0FF33,stroke:#E3E0FF,stroke-width:2px
+  style vehicles fill:#DDF3E4,stroke:#667085,text-align:left
+  style vehicle_diagnostic_codes fill:#DDF3E4,stroke:#667085,text-align:left
+  style drivers fill:#DDF3E4,stroke:#667085,text-align:left
+  style locations fill:#DDF3E4,stroke:#667085,text-align:left
+  style shifts fill:#DDF3E4,stroke:#667085,text-align:left
+  style inspections fill:#DDF3E4,stroke:#667085,text-align:left
+  style inspection_items fill:#DDF3E4,stroke:#667085,text-align:left
+  style geofences fill:#DDF3E4,stroke:#667085,text-align:left
+  style geofence_vehicles fill:#DDF3E4,stroke:#667085,text-align:left
+  style G1 fill:#DDF3E433,stroke:#DDF3E4,stroke-width:2px
+  style fleet_policy fill:#FFF1D6,stroke:#667085,text-align:left
+  style fleet_policy_sos_recipients fill:#FFF1D6,stroke:#667085,text-align:left
+  style traffic_state fill:#FFF1D6,stroke:#667085,text-align:left
+  style optimization_configs fill:#FFF1D6,stroke:#667085,text-align:left
+  style optimization_config_vehicle_types fill:#FFF1D6,stroke:#667085,text-align:left
+  style optimization_config_parameters fill:#FFF1D6,stroke:#667085,text-align:left
+  style contracts fill:#FFF1D6,stroke:#667085,text-align:left
+  style fleet_allocations fill:#FFF1D6,stroke:#667085,text-align:left
+  style G2 fill:#FFF1D633,stroke:#FFF1D6,stroke-width:2px
+  style vehicle_events fill:#FFDDDD,stroke:#667085,text-align:left
+  style alcohol_tests fill:#FFDDDD,stroke:#667085,text-align:left
+  style incidents fill:#FFDDDD,stroke:#667085,text-align:left
+  style sos_dispatches fill:#FFDDDD,stroke:#667085,text-align:left
+  style G3 fill:#FFDDDD33,stroke:#FFDDDD,stroke-width:2px
+  style notifications fill:#EEEEEE,stroke:#667085,text-align:left
+  style support_tickets fill:#EEEEEE,stroke:#667085,text-align:left
+  style audit_events fill:#EEEEEE,stroke:#667085,text-align:left
+  style user_settings fill:#EEEEEE,stroke:#667085,text-align:left
+  style id_counters fill:#EEEEEE,stroke:#667085,text-align:left
+  style schema_migrations fill:#EEEEEE,stroke:#667085,text-align:left
+  style G4 fill:#EEEEEE33,stroke:#EEEEEE,stroke-width:2px
+  style x_public_platform_users fill:#ffffff,stroke:#667085,stroke-dasharray:5 3
+  style x_public_global_roles fill:#ffffff,stroke:#667085,stroke-dasharray:5 3
+  style x_public_tenants fill:#ffffff,stroke:#667085,stroke-dasharray:5 3
+  style GX fill:#ffffff,stroke:#98a2b3,stroke-dasharray:5 3
+  drivers --> alcohol_tests
+  drivers --> incidents
+  drivers --> inspections
+  drivers --> shifts
+  drivers --> vehicle_events
+  drivers --> vehicles
+  fleet_policy --> fleet_policy_sos_recipients
+  geofences --> geofence_vehicles
+  geofences --> vehicle_events
+  incidents --> alcohol_tests
+  incidents --> inspections
+  incidents --> sos_dispatches
+  incidents --> vehicle_events
+  inspections --> inspection_items
+  locations --> shifts
+  locations --> vehicles
+  optimization_configs --> optimization_config_parameters
+  optimization_configs --> optimization_config_vehicle_types
+  vehicles --> alcohol_tests
+  vehicles --> drivers
+  vehicles --> geofence_vehicles
+  vehicles --> incidents
+  vehicles --> inspections
+  vehicles --> vehicle_diagnostic_codes
+  vehicles --> vehicle_events
+  x_public_global_roles --> admins
+  x_public_platform_users --> admins
+  x_public_platform_users --> companies
+  x_public_platform_users --> fleet_users
+  x_public_platform_users --> managers
+  x_public_tenants --> companies

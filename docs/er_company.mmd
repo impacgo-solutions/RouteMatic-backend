@@ -1,0 +1,181 @@
+%%{init: {'flowchart': {'htmlLabels': true, 'nodeSpacing': 25, 'rankSpacing': 70, 'curve': 'basis'}}}%%
+flowchart LR
+  subgraph G0["Fleet registry & users"]
+    direction TB
+    managers["<b>managers</b><br/>🔑 id<br/>🔗 user_id<br/>phone<br/>status<br/>created_at<br/>updated_at"]
+  end
+  subgraph G1["Fleet assets"]
+    direction TB
+    locations["<b>locations</b><br/>🔑 id<br/>code<br/>name<br/>type<br/>address<br/>demo_x<br/>demo_y<br/>geofence_radius_m<br/>🔗 employer_id<br/>active<br/>notes<br/>capacity<br/>latitude<br/>longitude<br/>fleet_owned"]
+  end
+  subgraph G2["Safety & telematics"]
+    direction TB
+    incidents["<b>incidents</b><br/>🔑 id<br/>reference<br/>type<br/>🔗 trip_id<br/>🔗 driver_id<br/>🔗 vehicle_id<br/>location_id<br/>description<br/>severity<br/>status<br/>reported_by_role<br/>reported_by_id<br/>resolution_notes<br/>demo_location_label<br/>replacement_requested<br/>is_sos<br/>created_at<br/>updated_at"]
+    sos_dispatches["<b>sos_dispatches</b><br/>🔑 id<br/>🔗 incident_id<br/>recipient<br/>status<br/>channel<br/>created_at<br/>acknowledged_at<br/>acknowledged_by<br/>note"]
+  end
+  subgraph G3["Company profile & people"]
+    direction TB
+    employers["<b>employers</b><br/>🔑 id<br/>code<br/>name<br/>status<br/>currency<br/>maximum_arrival_minutes<br/>default_distance_rate<br/>preferred_ev_percentage<br/>luxury_preference<br/>cost_priority<br/>punctuality_priority<br/>security_guard_policy_enabled<br/>allow_shared_pooling<br/>allow_cross_employer_pooling<br/>pickup_tolerance_minutes<br/>billing_cycle<br/>billing_active<br/>additional_charge_per_trip<br/>contact_name<br/>contact_email<br/>created_at<br/>updated_at<br/>address"]
+    employer_shifts["<b>employer_shifts</b><br/>🔑 employer_id<br/>🔑 position<br/>shift_key<br/>label<br/>start_minutes<br/>end_minutes"]
+    employer_vehicle_type_prefs["<b>employer_vehicle_type_prefs</b><br/>🔑 employer_id<br/>🔑 vehicle_type<br/>position"]
+    employees["<b>employees</b><br/>🔑 id<br/>employee_code<br/>🔗 employer_id<br/>name<br/>fictional_email<br/>fictional_phone<br/>🔗 pickup_location_id<br/>🔗 destination_id<br/>required_arrival_minutes<br/>shift_label<br/>transport_preference<br/>status<br/>optional_demo_password_enabled<br/>guard_escort_required<br/>notes<br/>shift_start_minutes<br/>shift_end_minutes<br/>pickup_tolerance_minutes<br/>gender"]
+    employee_travel_preferences["<b>employee_travel_preferences</b><br/>🔑 employee_id<br/>🔑 pref_key<br/>level"]
+  end
+  subgraph G4["Trips & routes"]
+    direction TB
+    routes["<b>routes</b><br/>🔑 id<br/>route_code<br/>name<br/>🔗 employer_id<br/>estimated_distance_km<br/>estimated_duration_minutes<br/>status<br/>🔗 optimization_run_id<br/>variant"]
+    route_stops["<b>route_stops</b><br/>🔑 id<br/>🔗 route_id<br/>🔗 location_id<br/>sequence<br/>kind<br/>planned_arrival<br/>actual_arrival<br/>departed_at<br/>expected_boarding_count<br/>expected_alighting_count<br/>status<br/>skip_reason<br/>skip_authorized_by<br/>issue_note"]
+    route_stop_passengers["<b>route_stop_passengers</b><br/>🔑 stop_id<br/>🔑 employee_id<br/>🔑 direction<br/>position"]
+    trips["<b>trips</b><br/>🔑 id<br/>trip_code<br/>🔗 employer_id<br/>🔗 assigned_driver_id<br/>🔗 assigned_vehicle_id<br/>🔗 route_id<br/>service_date<br/>scheduled_start<br/>actual_start<br/>scheduled_arrival<br/>actual_arrival<br/>🔗 origin_location_id<br/>🔗 destination_location_id<br/>distance_km<br/>estimated_duration_minutes<br/>actual_duration_minutes<br/>status<br/>🔗 optimization_run_id<br/>delay_reason<br/>completion_notes<br/>completion_exception<br/>billable_status<br/>guard_required<br/>instructions<br/>start_odometer_km<br/>end_odometer_km<br/>🔗 inspection_id<br/>cancellation_reason<br/>guard_reference<br/>created_at<br/>updated_at"]
+    trip_passengers["<b>trip_passengers</b><br/>🔑 trip_id<br/>🔑 employee_id<br/>🔑 state<br/>position"]
+    trip_stops["<b>trip_stops</b><br/>🔑 trip_id<br/>🔑 location_id<br/>position"]
+    trip_assignment_history["<b>trip_assignment_history</b><br/>🔑 trip_id<br/>🔑 position<br/>at<br/>actor_role<br/>🔗 driver_id<br/>🔗 vehicle_id<br/>reason"]
+    trip_status_history["<b>trip_status_history</b><br/>🔑 id<br/>🔗 trip_id<br/>from_status<br/>to_status<br/>reason<br/>changed_by<br/>changed_at"]
+    bookings["<b>bookings</b><br/>🔑 id<br/>reference<br/>🔗 employee_id<br/>🔗 trip_id<br/>🔗 requested_pickup_location_id<br/>🔗 requested_destination_id<br/>requested_date<br/>requested_arrival_minutes<br/>status<br/>notes<br/>preference<br/>decision_reason<br/>created_at<br/>updated_at"]
+    passenger_events["<b>passenger_events</b><br/>🔑 id<br/>🔗 trip_id<br/>🔗 employee_id<br/>🔗 stop_id<br/>event_type<br/>verification_method<br/>verification_status<br/>event_time<br/>note<br/>authorized_by"]
+    route_revisions["<b>route_revisions</b><br/>🔑 id<br/>🔗 trip_id<br/>created_at<br/>scenario_key<br/>scenario_label<br/>reason<br/>previous_departure<br/>proposed_departure<br/>delay_minutes<br/>feasible<br/>status<br/>violations<br/>recommendation<br/>applied_at<br/>simulated"]
+    route_revision_employees["<b>route_revision_employees</b><br/>🔑 revision_id<br/>🔑 employee_id<br/>position"]
+    route_revision_stops["<b>route_revision_stops</b><br/>🔑 revision_id<br/>🔑 position<br/>stop_id<br/>🔗 location_id<br/>previous<br/>proposed<br/>locked<br/>employee_ids"]
+  end
+  subgraph G5["Optimization runs"]
+    direction TB
+    optimization_runs["<b>optimization_runs</b><br/>🔑 id<br/>reference<br/>🔗 configuration_id<br/>🔗 employer_id<br/>created_at<br/>service_date<br/>status<br/>input_summary<br/>output_summary<br/>total_distance_km<br/>estimated_minutes<br/>estimated_cost<br/>on_time_score<br/>vehicle_utilization<br/>ev_allocation_percentage<br/>score<br/>is_simulation<br/>applied_at<br/>rejected_at<br/>rejection_reason<br/>warnings<br/>explanation<br/>hard_constraint_violations<br/>alternatives<br/>remedies<br/>preference_summary<br/>constraints_evaluated<br/>weights_snapshot"]
+    optimization_run_employees["<b>optimization_run_employees</b><br/>🔑 run_id<br/>🔑 employee_id<br/>position"]
+    optimization_run_candidates["<b>optimization_run_candidates</b><br/>🔑 run_id<br/>🔑 resource_id<br/>🔑 resource_type<br/>position"]
+    optimization_run_applied_trips["<b>optimization_run_applied_trips</b><br/>🔑 run_id<br/>🔑 trip_id<br/>position"]
+    optimization_run_plans["<b>optimization_run_plans</b><br/>🔑 run_id<br/>🔑 position<br/>🔗 vehicle_id<br/>🔗 driver_id<br/>employee_ids<br/>stops<br/>distance_km<br/>duration_minutes<br/>estimated_cost<br/>departure<br/>latest_arrival<br/>deadline<br/>passenger_capacity<br/>guard_seats<br/>variant<br/>start_location_id<br/>deadhead_km<br/>guard_source<br/>total_seats"]
+    optimization_run_scores["<b>optimization_run_scores</b><br/>🔑 run_id<br/>🔑 position<br/>component_key<br/>label<br/>weight<br/>normalized_penalty<br/>detail"]
+  end
+  subgraph G6["Billing"]
+    direction TB
+    billing_records["<b>billing_records</b><br/>🔑 id<br/>🔗 employer_id<br/>🔗 trip_id<br/>trip_code<br/>completed_at<br/>billable_distance_km<br/>rate_per_km<br/>additional_charges<br/>adjustment<br/>total_amount<br/>status<br/>calculation_notes<br/>dispute_reason<br/>created_at<br/>reviewed_at<br/>🔗 invoice_id"]
+    invoices["<b>invoices</b><br/>🔑 id<br/>reference<br/>🔗 employer_id<br/>cycle<br/>period_start<br/>period_end<br/>sequence<br/>distance_km<br/>distance_charges<br/>additional_charges<br/>adjustments<br/>total<br/>status<br/>generated_at<br/>notes<br/>dispute_reason<br/>reviewed_at"]
+    invoice_trips["<b>invoice_trips</b><br/>🔑 invoice_id<br/>🔑 trip_id<br/>position"]
+  end
+  subgraph G7["Platform (per schema)"]
+    direction TB
+    notifications["<b>notifications</b><br/>🔑 id<br/>recipient_role<br/>recipient_id<br/>title<br/>body<br/>category<br/>created_at<br/>read_at<br/>related_entity_type<br/>related_entity_id<br/>demo_only"]
+    support_tickets["<b>support_tickets</b><br/>🔑 id<br/>reference<br/>created_by_role<br/>created_by_id<br/>category<br/>subject<br/>description<br/>🔗 related_trip_id<br/>status<br/>response<br/>created_at<br/>updated_at"]
+    audit_events["<b>audit_events</b><br/>🔑 id<br/>actor_role<br/>actor_id<br/>action<br/>entity_type<br/>entity_id<br/>timestamp<br/>summary<br/>outcome<br/>changes<br/>reason<br/>related<br/>simulated"]
+    user_settings["<b>user_settings</b><br/>🔑 id<br/>share_simulated_location<br/>pickup_reminders<br/>delay_alerts<br/>service_notices<br/>show_phone_to_driver<br/>large_text"]
+    id_counters["<b>id_counters</b><br/>🔑 prefix<br/>last_value"]
+    schema_migrations["<b>schema_migrations</b><br/>🔑 version<br/>name<br/>checksum<br/>applied_at<br/>duration_ms"]
+  end
+  subgraph GX["Other schemas (referenced, not copied)"]
+    x_public_platform_users["public.platform_users"]
+    x_fleet_workspace_optimization_configs["fleet_workspace.optimization_configs"]
+    x_fleet_workspace_drivers["fleet_workspace.drivers"]
+    x_fleet_workspace_vehicles["fleet_workspace.vehicles"]
+    x_fleet_workspace_inspections["fleet_workspace.inspections"]
+  end
+  style managers fill:#E3E0FF,stroke:#667085,text-align:left
+  style G0 fill:#E3E0FF33,stroke:#E3E0FF,stroke-width:2px
+  style locations fill:#DDF3E4,stroke:#667085,text-align:left
+  style G1 fill:#DDF3E433,stroke:#DDF3E4,stroke-width:2px
+  style incidents fill:#FFDDDD,stroke:#667085,text-align:left
+  style sos_dispatches fill:#FFDDDD,stroke:#667085,text-align:left
+  style G2 fill:#FFDDDD33,stroke:#FFDDDD,stroke-width:2px
+  style employers fill:#DCE9FF,stroke:#667085,text-align:left
+  style employer_shifts fill:#DCE9FF,stroke:#667085,text-align:left
+  style employer_vehicle_type_prefs fill:#DCE9FF,stroke:#667085,text-align:left
+  style employees fill:#DCE9FF,stroke:#667085,text-align:left
+  style employee_travel_preferences fill:#DCE9FF,stroke:#667085,text-align:left
+  style G3 fill:#DCE9FF33,stroke:#DCE9FF,stroke-width:2px
+  style routes fill:#FFF1D6,stroke:#667085,text-align:left
+  style route_stops fill:#FFF1D6,stroke:#667085,text-align:left
+  style route_stop_passengers fill:#FFF1D6,stroke:#667085,text-align:left
+  style trips fill:#FFF1D6,stroke:#667085,text-align:left
+  style trip_passengers fill:#FFF1D6,stroke:#667085,text-align:left
+  style trip_stops fill:#FFF1D6,stroke:#667085,text-align:left
+  style trip_assignment_history fill:#FFF1D6,stroke:#667085,text-align:left
+  style trip_status_history fill:#FFF1D6,stroke:#667085,text-align:left
+  style bookings fill:#FFF1D6,stroke:#667085,text-align:left
+  style passenger_events fill:#FFF1D6,stroke:#667085,text-align:left
+  style route_revisions fill:#FFF1D6,stroke:#667085,text-align:left
+  style route_revision_employees fill:#FFF1D6,stroke:#667085,text-align:left
+  style route_revision_stops fill:#FFF1D6,stroke:#667085,text-align:left
+  style G4 fill:#FFF1D633,stroke:#FFF1D6,stroke-width:2px
+  style optimization_runs fill:#EBDDFB,stroke:#667085,text-align:left
+  style optimization_run_employees fill:#EBDDFB,stroke:#667085,text-align:left
+  style optimization_run_candidates fill:#EBDDFB,stroke:#667085,text-align:left
+  style optimization_run_applied_trips fill:#EBDDFB,stroke:#667085,text-align:left
+  style optimization_run_plans fill:#EBDDFB,stroke:#667085,text-align:left
+  style optimization_run_scores fill:#EBDDFB,stroke:#667085,text-align:left
+  style G5 fill:#EBDDFB33,stroke:#EBDDFB,stroke-width:2px
+  style billing_records fill:#D9F2F2,stroke:#667085,text-align:left
+  style invoices fill:#D9F2F2,stroke:#667085,text-align:left
+  style invoice_trips fill:#D9F2F2,stroke:#667085,text-align:left
+  style G6 fill:#D9F2F233,stroke:#D9F2F2,stroke-width:2px
+  style notifications fill:#EEEEEE,stroke:#667085,text-align:left
+  style support_tickets fill:#EEEEEE,stroke:#667085,text-align:left
+  style audit_events fill:#EEEEEE,stroke:#667085,text-align:left
+  style user_settings fill:#EEEEEE,stroke:#667085,text-align:left
+  style id_counters fill:#EEEEEE,stroke:#667085,text-align:left
+  style schema_migrations fill:#EEEEEE,stroke:#667085,text-align:left
+  style G7 fill:#EEEEEE33,stroke:#EEEEEE,stroke-width:2px
+  style x_public_platform_users fill:#ffffff,stroke:#667085,stroke-dasharray:5 3
+  style x_fleet_workspace_optimization_configs fill:#ffffff,stroke:#667085,stroke-dasharray:5 3
+  style x_fleet_workspace_drivers fill:#ffffff,stroke:#667085,stroke-dasharray:5 3
+  style x_fleet_workspace_vehicles fill:#ffffff,stroke:#667085,stroke-dasharray:5 3
+  style x_fleet_workspace_inspections fill:#ffffff,stroke:#667085,stroke-dasharray:5 3
+  style GX fill:#ffffff,stroke:#98a2b3,stroke-dasharray:5 3
+  employees --> bookings
+  employees --> employee_travel_preferences
+  employees --> optimization_run_employees
+  employees --> passenger_events
+  employees --> route_revision_employees
+  employees --> route_stop_passengers
+  employees --> trip_passengers
+  employers --> billing_records
+  employers --> employees
+  employers --> employer_shifts
+  employers --> employer_vehicle_type_prefs
+  employers --> invoices
+  employers --> locations
+  employers --> optimization_runs
+  employers --> routes
+  employers --> trips
+  incidents --> sos_dispatches
+  invoices --> billing_records
+  invoices --> invoice_trips
+  locations --> bookings
+  locations --> employees
+  locations --> route_revision_stops
+  locations --> route_stops
+  locations --> trip_stops
+  locations --> trips
+  optimization_runs --> optimization_run_applied_trips
+  optimization_runs --> optimization_run_candidates
+  optimization_runs --> optimization_run_employees
+  optimization_runs --> optimization_run_plans
+  optimization_runs --> optimization_run_scores
+  optimization_runs --> routes
+  optimization_runs --> trips
+  route_revisions --> route_revision_employees
+  route_revisions --> route_revision_stops
+  route_stops --> passenger_events
+  route_stops --> route_stop_passengers
+  routes --> route_stops
+  routes --> trips
+  trips --> billing_records
+  trips --> bookings
+  trips --> incidents
+  trips --> invoice_trips
+  trips --> passenger_events
+  trips --> route_revisions
+  trips --> support_tickets
+  trips --> trip_assignment_history
+  trips --> trip_passengers
+  trips --> trip_status_history
+  trips --> trip_stops
+  x_fleet_workspace_drivers --> incidents
+  x_fleet_workspace_drivers --> optimization_run_plans
+  x_fleet_workspace_drivers --> trip_assignment_history
+  x_fleet_workspace_drivers --> trips
+  x_fleet_workspace_inspections --> trips
+  x_fleet_workspace_optimization_configs --> optimization_runs
+  x_fleet_workspace_vehicles --> incidents
+  x_fleet_workspace_vehicles --> optimization_run_plans
+  x_fleet_workspace_vehicles --> trip_assignment_history
+  x_fleet_workspace_vehicles --> trips
+  x_public_platform_users --> managers
