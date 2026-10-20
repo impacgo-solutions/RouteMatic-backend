@@ -1,0 +1,10 @@
+.env
+_pycache_/
+*.pyc
+.pytest_cache/
+backups/
+.env.demo
+DEMO_ACCOUNTS.local.md
+
+# project-local Python environment (recreate with start_routematic.bat or: py -3.13 -m venv .venv)
+.venv/

@@ -1,0 +1,202 @@
+
+"""Database-free corporate mobility route simulation MVP."""
+from __future__ import annotations
+
+from math import asin, cos, radians, sin, sqrt
+from typing import Any
+
+EARTH_RADIUS_KM = 6371.0088
+
+
+def distance_km(a: dict, b: dict) -> float:
+    """Calculate geographic straight-line distance in kilometres."""
+    lat1, lat2 = radians(a["lat"]), radians(b["lat"])
+    dlat = lat2 - lat1
+    dlng = radians(b["lng"] - a["lng"])
+
+    h = (
+        sin(dlat / 2) ** 2
+        + cos(lat1) * cos(lat2) * sin(dlng / 2) ** 2
+    )
+    return 2 * EARTH_RADIUS_KM * asin(min(1.0, sqrt(h)))
+
+
+def simulate_routes(
+    employees: list[dict[str, Any]],
+    vehicles: list[dict[str, Any]],
+    traffic_factor: float = 1.0,
+    road_detour_factor: float = 1.25,
+) -> dict[str, Any]:
+    """Greedy employee assignment and pickup/drop-off route simulation.
+
+    Employee format:
+      {"id": "E1", "pickup": {"lat": 17.72, "lng": 83.30},
+       "dropoff": {"lat": 17.73, "lng": 83.31}}
+
+    Vehicle format:
+      {"id": "V1", "depot": {"lat": 17.71, "lng": 83.29},
+       "capacity": 3, "speed_kmph": 25}
+    """
+    if not employees:
+        raise ValueError("At least one employee is required")
+    if not vehicles:
+        raise ValueError("At least one vehicle is required")
+    if not 0.5 <= traffic_factor <= 3.0:
+        raise ValueError("traffic_factor must be between 0.5 and 3.0")
+    if not 1.0 <= road_detour_factor <= 2.0:
+        raise ValueError("road_detour_factor must be between 1.0 and 2.0")
+
+    employee_ids = [e["id"] for e in employees]
+    vehicle_ids = [v["id"] for v in vehicles]
+
+    if len(set(employee_ids)) != len(employee_ids):
+        raise ValueError("Employee IDs must be unique")
+    if len(set(vehicle_ids)) != len(vehicle_ids):
+        raise ValueError("Vehicle IDs must be unique")
+
+    for employee in employees:
+        for key in ("pickup", "dropoff"):
+            point = employee[key]
+            if not -90 <= point["lat"] <= 90:
+                raise ValueError(f"Invalid latitude for employee {employee['id']}")
+            if not -180 <= point["lng"] <= 180:
+                raise ValueError(f"Invalid longitude for employee {employee['id']}")
+
+    assignments = {v["id"]: [] for v in vehicles}
+    vehicle_by_id = {v["id"]: v for v in vehicles}
+    employee_by_id = {e["id"]: e for e in employees}
+    unassigned = []
+
+    # Assign the employees with the longest pickup journey first.
+    ordered = sorted(
+        employees,
+        key=lambda e: distance_km(e["pickup"], e["dropoff"]),
+        reverse=True,
+    )
+
+    for employee in ordered:
+        candidates = []
+
+        for vehicle in vehicles:
+            assigned = assignments[vehicle["id"]]
+            capacity = int(vehicle["capacity"])
+
+            if capacity < 1:
+                raise ValueError(f"Vehicle {vehicle['id']} has invalid capacity")
+            if len(assigned) >= capacity:
+                continue
+
+            anchor = (
+                vehicle["depot"]
+                if not assigned
+                else employee_by_id[assigned[-1]]["pickup"]
+            )
+
+            added_distance = (
+                distance_km(anchor, employee["pickup"])
+                + distance_km(employee["pickup"], employee["dropoff"])
+            ) * road_detour_factor
+
+            candidates.append((added_distance, len(assigned), vehicle["id"]))
+
+        if not candidates:
+            unassigned.append({
+                "employee_id": employee["id"],
+                "reason": "Vehicle capacity exhausted",
+            })
+            continue
+
+        chosen_id = min(candidates)[2]
+        assignments[chosen_id].append(employee["id"])
+
+    routes = []
+    total_distance = 0.0
+    total_duration = 0
+
+    for vehicle in vehicles:
+        vehicle_id = vehicle["id"]
+        employee_list = assignments[vehicle_id]
+        current = vehicle["depot"]
+        pending_pickups = set(employee_list)
+        pending_dropoffs = set()
+        stops = []
+        distance_total = 0.0
+        elapsed_min = 0.0
+        speed = float(vehicle.get("speed_kmph", 25))
+
+        if not 5 <= speed <= 100:
+            raise ValueError(f"Invalid speed for vehicle {vehicle_id}")
+
+        while pending_pickups or pending_dropoffs:
+            candidates = []
+
+            for eid in pending_pickups:
+                point = employee_by_id[eid]["pickup"]
+                candidates.append((
+                    distance_km(current, point), 0, eid, "pickup", point
+                ))
+
+            for eid in pending_dropoffs:
+                point = employee_by_id[eid]["dropoff"]
+                candidates.append((
+                    distance_km(current, point), 1, eid, "dropoff", point
+                ))
+
+            leg, _, eid, stop_type, point = min(
+                candidates, key=lambda item: (item[0], item[1], item[2])
+            )
+
+            road_km = leg * road_detour_factor
+            travel_min = road_km / speed * 60 * traffic_factor
+            elapsed_min += travel_min
+            distance_total += road_km
+
+            if stop_type == "pickup":
+                pending_pickups.remove(eid)
+                pending_dropoffs.add(eid)
+                elapsed_min += 3  # simulated boarding time
+            else:
+                pending_dropoffs.remove(eid)
+                elapsed_min += 1  # simulated drop-off time
+
+            stops.append({
+                "sequence": len(stops) + 1,
+                "type": stop_type,
+                "employee_id": eid,
+                "lat": point["lat"],
+                "lng": point["lng"],
+                "leg_distance_km": round(road_km, 2),
+                "travel_time_min": round(travel_min, 1),
+                "eta_min": round(elapsed_min, 1),
+            })
+            current = point
+
+        duration = round(elapsed_min)
+        total_distance += distance_total
+        total_duration += duration
+
+        routes.append({
+            "vehicle_id": vehicle_id,
+            "capacity": int(vehicle["capacity"]),
+            "assigned_count": len(employee_list),
+            "employee_ids": employee_list,
+            "stops": stops,
+            "distance_km": round(distance_total, 2),
+            "duration_min": duration,
+        })
+
+    return {
+        "mode": "simulation",
+        "traffic_factor": traffic_factor,
+        "summary": {
+            "employees_total": len(employees),
+            "employees_assigned": len(employees) - len(unassigned),
+            "employees_unassigned": len(unassigned),
+            "distance_km": round(total_distance, 2),
+            "duration_min": total_duration,
+        },
+        "routes": routes,
+        "unassigned": unassigned,
+        "distance_source": "Haversine estimate with road-detour factor",
+    }
+
