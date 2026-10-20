@@ -47,8 +47,8 @@ class Settings(BaseSettings):
     jwt_issuer: str = "routematic-api"
     jwt_audience: str = "routematic-app"
     # Swagger UI / ReDoc / openapi.json (off in production)
-    enable_docs: bool = True
 
+    enable_docs: bool = False
     # Strict-Transport-Security header: enable only when the API is served over HTTPS
     hsts_enabled: bool = False
     # largest accepted request body (bytes); larger requests get 413
